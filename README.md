@@ -4,7 +4,7 @@ Interactive map showing Michigan's U.S. Congressional, State Senate, and State H
 
 ## 🗺️ Live Map
 
-Visit: **https://YOUR-USERNAME.github.io/michigan-districts/**
+Visit: **https://Fuzzy24.github.io/michigan-districts/**
 
 (Replace YOUR-USERNAME with your GitHub username)
 
