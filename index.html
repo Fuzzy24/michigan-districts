@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Michigan District Locator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .header {
+            background: #003a70;
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: #f5f5f5;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .search-section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #003a70;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .search-btn {
+            width: 100%;
+            padding: 10px;
+            background: #003a70;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .search-btn:hover {
+            background: #00508f;
+        }
+        
+        .layers-section {
+            background: white;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .layers-section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #003a70;
+        }
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .layer-toggle:last-child {
+            border-bottom: none;
+        }
+        .layer-toggle input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .layer-toggle label {
+            cursor: pointer;
+            font-size: 14px;
+            flex: 1;
+        }
+        .layer-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 3px;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px #ccc;
+        }
+        
+        .info-section {
+            background: white;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .info-section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #003a70;
+        }
+        .info-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .info-value {
+            color: #003a70;
+            margin-top: 3px;
+        }
+        
+        #map {
+            flex: 1;
+            position: relative;
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .map-control-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: block;
+            border-bottom: 1px solid #ddd;
+        }
+        .map-control-btn:last-child {
+            border-bottom: none;
+        }
+        .map-control-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-size: 12px;
+        }
+        .legend h4 {
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 15px;
+            margin-right: 8px;
+            border: 1px solid #999;
+        }
+        
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Michigan District Locator</h1>
+        <p>Find your Congressional and Legislative Districts</p>
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="note">
+                <strong>Demo Version:</strong> This shows simplified boundaries. To use real data:
+                <ol style="margin: 8px 0 0 20px; font-size: 12px;">
+                    <li>Save this HTML file to your computer</li>
+                    <li>Download GeoJSON files from links below</li>
+                    <li>Place files in same folder</li>
+                    <li>Open HTML file in browser</li>
+                </ol>
+                <div style="margin-top: 8px; font-size: 11px;">
+                    <strong>Download links:</strong><br>
+                    <a href="https://gis-michigan.opendata.arcgis.com/datasets/Michigan::michigan-u-s-congressional-districts-2021" target="_blank" style="color: #003a70;">Congressional Districts</a><br>
+                    <a href="https://gis-michigan.opendata.arcgis.com/datasets/Michigan::michigan-state-senate-districts-2021" target="_blank" style="color: #003a70;">State Senate Districts</a><br>
+                    <a href="https://gis-michigan.opendata.arcgis.com/datasets/Michigan::michigan-state-house-districts-2021" target="_blank" style="color: #003a70;">State House Districts</a>
+                </div>
+            </div>
+            
+            <div class="search-section">
+                <h3>Search by Address</h3>
+                <input type="text" class="search-input" id="addressInput" placeholder="Enter a Michigan address...">
+                <button class="search-btn" onclick="searchAddress()">Find My Districts</button>
+            </div>
+            
+            <div class="layers-section">
+                <h3>District Layers</h3>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="congressCheck" checked onchange="toggleLayer('congress')">
+                    <label for="congressCheck">U.S. Congressional Districts</label>
+                    <div class="layer-color" style="background: #3388ff;"></div>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="senateCheck" onchange="toggleLayer('senate')">
+                    <label for="senateCheck">State Senate Districts</label>
+                    <div class="layer-color" style="background: #ff6b6b;"></div>
+                </div>
+                <div class="layer-toggle">
+                    <input type="checkbox" id="houseCheck" onchange="toggleLayer('house')">
+                    <label for="houseCheck">State House Districts</label>
+                    <div class="layer-color" style="background: #4ecdc4;"></div>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h3>Location Information</h3>
+                <div id="locationInfo">
+                    <div style="color: #999; font-style: italic; font-size: 13px;">
+                        Click on the map to view district information
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="map">
+            <div class="map-controls">
+                <button class="map-control-btn" onclick="map.zoomIn()" title="Zoom In">+</button>
+                <button class="map-control-btn" onclick="map.zoomOut()" title="Zoom Out">−</button>
+                <button class="map-control-btn" onclick="resetView()" title="Reset View">⌂</button>
+            </div>
+            
+            <div class="legend">
+                <h4>Active Layers</h4>
+                <div id="legendContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script>
+        const map = L.map('map').setView([44.3148, -85.6024], 7);
+        const initialView = { center: [44.3148, -85.6024], zoom: 7 };
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        const layers = { congress: null, senate: null, house: null };
+        const colors = {
+            congress: '#3388ff',
+            senate: '#ff6b6b',
+            house: '#4ecdc4'
+        };
+        const names = {
+            congress: 'Congressional',
+            senate: 'State Senate',
+            house: 'State House'
+        };
+
+        // District data - will be loaded from files or embedded
+        const districtData = {
+            congress: null,  // Will load from congress.geojson
+            senate: null,    // Will load from senate.geojson  
+            house: null      // Will load from house.geojson
+        };
+        
+        // Try to load real data from local files
+        async function loadRealData(type) {
+            const fileNames = {
+                congress: 'congress.geojson',
+                senate: 'senate.geojson',
+                house: 'house.geojson'
+            };
+            
+            try {
+                const response = await fetch(fileNames[type]);
+                if (response.ok) {
+                    const data = await response.json();
+                    districtData[type] = data;
+                    return true;
+                }
+            } catch (e) {
+                console.log(`Could not load ${fileNames[type]}, using demo data`);
+            }
+            
+            // Fallback to demo data if file not found
+            districtData[type] = generateDemoData(type, 
+                type === 'congress' ? 13 : type === 'senate' ? 38 : 110);
+            return false;
+        }
+        
+        // Simplified demo data fallback
+        function generateDemoData(type, count) {
+            const features = [];
+            const cols = Math.ceil(Math.sqrt(count));
+            const rows = Math.ceil(count / cols);
+            const lonRange = [-90.4, -82.4];
+            const latRange = [41.7, 47.5];
+            const lonStep = (lonRange[1] - lonRange[0]) / cols;
+            const latStep = (latRange[1] - latRange[0]) / rows;
+
+            for (let i = 0; i < count; i++) {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const lon1 = lonRange[0] + col * lonStep;
+                const lon2 = lon1 + lonStep;
+                const lat1 = latRange[0] + row * latStep;
+                const lat2 = lat1 + latStep;
+
+                features.push({
+                    type: "Feature",
+                    properties: { district: String(i + 1), name: `District ${i + 1}` },
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: [[[lon1, lat1], [lon2, lat1], [lon2, lat2], [lon1, lat2], [lon1, lat1]]]
+                    }
+                });
+            }
+            return { type: "FeatureCollection", features };
+        }
+
+        async function createLayer(type) {
+            // Load real data if available
+            if (!districtData[type]) {
+                await loadRealData(type);
+            }
+            
+            const data = districtData[type];
+            return L.geoJSON(data, {
+                style: {
+                    fillColor: colors[type],
+                    weight: 2,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.4
+                },
+                onEachFeature: (feature, layer) => {
+                    layer.on({
+                        click: (e) => showDistrictInfo(e, type, feature),
+                        mouseover: (e) => {
+                            e.target.setStyle({ fillOpacity: 0.7, weight: 3 });
+                        },
+                        mouseout: (e) => {
+                            e.target.setStyle({ fillOpacity: 0.4, weight: 2 });
+                        }
+                    });
+                }
+            });
+        }
+
+        async function toggleLayer(type) {
+            const checkbox = document.getElementById(type + 'Check');
+            
+            if (checkbox.checked) {
+                if (!layers[type]) {
+                    layers[type] = await createLayer(type);
+                }
+                layers[type].addTo(map);
+            } else {
+                if (layers[type]) {
+                    map.removeLayer(layers[type]);
+                }
+            }
+            
+            updateLegend();
+        }
+
+        function showDistrictInfo(e, type, feature) {
+            const latlng = e.latlng;
+            const info = { [type]: feature.properties.district };
+            
+            // Check all visible layers at this location
+            for (let layerType in layers) {
+                if (layers[layerType] && map.hasLayer(layers[layerType]) && layerType !== type) {
+                    layers[layerType].eachLayer(layer => {
+                        if (layer.getBounds().contains(latlng)) {
+                            info[layerType] = layer.feature.properties.district;
+                        }
+                    });
+                }
+            }
+            
+            displayLocationInfo(info, latlng);
+        }
+
+        function displayLocationInfo(info, latlng) {
+            let html = '<div class="info-item"><span class="info-label">Location:</span><div class="info-value">' + 
+                       latlng.lat.toFixed(4) + ', ' + latlng.lng.toFixed(4) + '</div></div>';
+            
+            if (info.congress) {
+                html += '<div class="info-item"><span class="info-label">Congressional District:</span><div class="info-value">District ' + info.congress + '</div></div>';
+            }
+            if (info.senate) {
+                html += '<div class="info-item"><span class="info-label">State Senate District:</span><div class="info-value">District ' + info.senate + '</div></div>';
+            }
+            if (info.house) {
+                html += '<div class="info-item"><span class="info-label">State House District:</span><div class="info-value">District ' + info.house + '</div></div>';
+            }
+            
+            document.getElementById('locationInfo').innerHTML = html;
+        }
+
+        function updateLegend() {
+            let html = '';
+            for (let type in layers) {
+                const checkbox = document.getElementById(type + 'Check');
+                if (checkbox.checked) {
+                    html += '<div class="legend-item"><div class="legend-color" style="background:' + 
+                            colors[type] + '"></div>' + names[type] + '</div>';
+                }
+            }
+            document.getElementById('legendContent').innerHTML = html || '<div style="color: #999; font-style: italic;">No layers active</div>';
+        }
+
+        function searchAddress() {
+            const address = document.getElementById('addressInput').value;
+            if (address) {
+                alert('Demo mode: Address search requires a geocoding service.\n\nIn the full version, this would:\n1. Geocode the address\n2. Find the location on the map\n3. Display all districts for that location');
+            }
+        }
+
+        function resetView() {
+            map.setView(initialView.center, initialView.zoom);
+        }
+
+        // Initialize
+        toggleLayer('congress');
+    </script>
+</body>
+</html>
