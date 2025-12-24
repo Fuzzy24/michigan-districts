@@ -190,8 +190,8 @@
             <div class="legend">
                 <h4>2024 Election Results</h4>
                 <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Democrat</div>
-                <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>6.5%)</div>
-                <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤6.5%)</div>
+                <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>8.1%)</div>
+                <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤8.1%)</div>
             </div>
         </div>
     </div>
@@ -247,7 +247,7 @@
             if (result.party === 'D') {
                 return '#FFFFFF';
             } else if (result.party === 'R') {
-                return result.margin > 6.5 ? '#DC143C' : '#9370DB';
+                return result.margin > 8.1 ? '#DC143C' : '#9370DB';
             }
             return colors[type];
         }
