@@ -37,6 +37,15 @@
             overflow-y: auto;
         }
         
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            font-size: 13px;
+        }
+        
         .search-section {
             background: white;
             padding: 20px;
@@ -46,27 +55,6 @@
             font-size: 16px;
             margin-bottom: 12px;
             color: #003a70;
-        }
-        .search-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .search-btn {
-            width: 100%;
-            padding: 10px;
-            background: #003a70;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-        .search-btn:hover {
-            background: #00508f;
         }
         
         .layers-section {
@@ -98,13 +86,6 @@
             cursor: pointer;
             font-size: 14px;
             flex: 1;
-        }
-        .layer-color {
-            width: 24px;
-            height: 24px;
-            border-radius: 3px;
-            border: 2px solid white;
-            box-shadow: 0 0 0 1px #ccc;
         }
         
         .info-section {
@@ -139,32 +120,6 @@
             position: relative;
         }
         
-        .map-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            border-radius: 4px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        }
-        .map-control-btn {
-            width: 34px;
-            height: 34px;
-            border: none;
-            background: white;
-            cursor: pointer;
-            font-size: 18px;
-            display: block;
-            border-bottom: 1px solid #ddd;
-        }
-        .map-control-btn:last-child {
-            border-bottom: none;
-        }
-        .map-control-btn:hover {
-            background: #f0f0f0;
-        }
-        
         .legend {
             position: absolute;
             bottom: 20px;
@@ -191,63 +146,33 @@
             margin-right: 8px;
             border: 1px solid #999;
         }
-        
-        .note {
-            background: #fff3cd;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 4px;
-            border-left: 4px solid #ffc107;
-            font-size: 13px;
-        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Michigan District Locator</h1>
-        <p>Find your Congressional and Legislative Districts</p>
+        <p>Find your Congressional and Legislative Districts - 2024 Election Results</p>
     </div>
     
     <div class="container">
         <div class="sidebar">
             <div class="note">
-                <strong>Demo Version:</strong> This shows simplified boundaries. To use real data:
-                <ol style="margin: 8px 0 0 20px; font-size: 12px;">
-                    <li>Save this HTML file to your computer</li>
-                    <li>Download GeoJSON files from links below</li>
-                    <li>Place files in same folder</li>
-                    <li>Open HTML file in browser</li>
-                </ol>
-                <div style="margin-top: 8px; font-size: 11px;">
-                    <strong>Download links:</strong><br>
-                    <a href="https://gis-michigan.opendata.arcgis.com/datasets/Michigan::michigan-u-s-congressional-districts-2021" target="_blank" style="color: #003a70;">Congressional Districts</a><br>
-                    <a href="https://gis-michigan.opendata.arcgis.com/datasets/Michigan::michigan-state-senate-districts-2021" target="_blank" style="color: #003a70;">State Senate Districts</a><br>
-                    <a href="https://gis-michigan.opendata.arcgis.com/datasets/Michigan::michigan-state-house-districts-2021" target="_blank" style="color: #003a70;">State House Districts</a>
-                </div>
-            </div>
-            
-            <div class="search-section">
-                <h3>Search by Address</h3>
-                <input type="text" class="search-input" id="addressInput" placeholder="Enter a Michigan address...">
-                <button class="search-btn" onclick="searchAddress()">Find My Districts</button>
+                <strong>Demo Mode:</strong> Showing simplified boundaries. Upload congress.geojson, senate.geojson, and house.geojson for accurate data.
             </div>
             
             <div class="layers-section">
                 <h3>District Layers</h3>
                 <div class="layer-toggle">
                     <input type="checkbox" id="congressCheck" checked onchange="toggleLayer('congress')">
-                    <label for="congressCheck">U.S. Congressional Districts</label>
-                    <div class="layer-color" style="background: #3388ff;"></div>
+                    <label for="congressCheck">U.S. Congressional Districts (13)</label>
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="senateCheck" onchange="toggleLayer('senate')">
-                    <label for="senateCheck">State Senate Districts</label>
-                    <div class="layer-color" style="background: #ff6b6b;"></div>
+                    <label for="senateCheck">State Senate Districts (38)</label>
                 </div>
                 <div class="layer-toggle">
                     <input type="checkbox" id="houseCheck" onchange="toggleLayer('house')">
-                    <label for="houseCheck">State House Districts</label>
-                    <div class="layer-color" style="background: #4ecdc4;"></div>
+                    <label for="houseCheck">State House Districts (110)</label>
                 </div>
             </div>
             
@@ -262,98 +187,71 @@
         </div>
         
         <div id="map">
-            <div class="map-controls">
-                <button class="map-control-btn" onclick="map.zoomIn()" title="Zoom In">+</button>
-                <button class="map-control-btn" onclick="map.zoomOut()" title="Zoom Out">−</button>
-                <button class="map-control-btn" onclick="resetView()" title="Reset View">⌂</button>
-            </div>
-            
             <div class="legend">
-                <h4>Legend</h4>
-                <div id="legendContent">
-                    <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Democrat</div>
-                    <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>7%)</div>
-                    <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤7%)</div>
-                </div>
+                <h4>2024 Election Results</h4>
+                <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Democrat</div>
+                <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>6.5%)</div>
+                <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤6.5%)</div>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
+        console.log('Script starting...');
+        
+        // Initialize map centered on Michigan
         const map = L.map('map').setView([44.3148, -85.6024], 7);
-        const initialView = { center: [44.3148, -85.6024], zoom: 7 };
+        console.log('Map initialized');
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 18
         }).addTo(map);
+        console.log('Base layer added');
 
-        const layers = { congress: null, senate: null, house: null };
+        let currentLayers = {};
+
+        // 2024 Election Results Data
+        const electionResults = {
+            congress: {
+                '1': { party: 'R', margin: 18.2, winner: 'Bergman' },
+                '2': { party: 'R', margin: 30.2, winner: 'Moolenaar' },
+                '3': { party: 'D', margin: 7.4, winner: 'Scholten' },
+                '4': { party: 'R', margin: 8.0, winner: 'Huizenga' },
+                '5': { party: 'R', margin: 24.0, winner: 'Walberg' },
+                '6': { party: 'D', margin: 24.0, winner: 'Dingell' },
+                '7': { party: 'R', margin: 6.0, winner: 'Barrett' },
+                '8': { party: 'D', margin: 5.0, winner: 'McDonald Rivet' },
+                '9': { party: 'R', margin: 28.0, winner: 'McClain' },
+                '10': { party: 'R', margin: 6.1, winner: 'James' },
+                '11': { party: 'D', margin: 15.0, winner: 'Stevens' },
+                '12': { party: 'D', margin: 40.0, winner: 'Tlaib' },
+                '13': { party: 'D', margin: 35.0, winner: 'Thanedar' }
+            },
+            senate: {},
+            house: {}
+        };
+
         const colors = {
             congress: '#3388ff',
             senate: '#ff6b6b',
             house: '#4ecdc4'
         };
 
-        // Function to get color based on election results
         function getDistrictColor(district, type) {
             const results = electionResults[type];
-            if (!results) return colors[type];
+            if (!results || !results[district]) return colors[type];
 
             const result = results[district];
-            if (!result) return colors[type];
-
             if (result.party === 'D') {
-                return '#FFFFFF'; // White for Democrats
+                return '#FFFFFF';
             } else if (result.party === 'R') {
-                if (result.margin > 7) {
-                    return '#DC143C'; // Red for Republican won by >7%
-                } else {
-                    return '#9370DB'; // Purple for Republican won by ≤7%
-                }
+                return result.margin > 6.5 ? '#DC143C' : '#9370DB';
             }
             return colors[type];
         }
-        const names = {
-            congress: 'Congressional',
-            senate: 'State Senate',
-            house: 'State House'
-        };
 
-        // District data - will be loaded from files or embedded
-        const districtData = {
-            congress: null,  // Will load from congress.geojson
-            senate: null,    // Will load from senate.geojson  
-            house: null      // Will load from house.geojson
-        };
-        
-        // Try to load real data from local files
-        async function loadRealData(type) {
-            const fileNames = {
-                congress: 'congress.geojson',
-                senate: 'senate.geojson',
-                house: 'house.geojson'
-            };
-            
-            try {
-                const response = await fetch(fileNames[type]);
-                if (response.ok) {
-                    const data = await response.json();
-                    districtData[type] = data;
-                    return true;
-                }
-            } catch (e) {
-                console.log(`Could not load ${fileNames[type]}, using demo data`);
-            }
-            
-            // Fallback to demo data if file not found
-            districtData[type] = generateDemoData(type, 
-                type === 'congress' ? 13 : type === 'senate' ? 38 : 110);
-            return false;
-        }
-        
-        // Simplified demo data fallback
         function generateDemoData(type, count) {
             const features = [];
             const cols = Math.ceil(Math.sqrt(count));
@@ -373,149 +271,118 @@
 
                 features.push({
                     type: "Feature",
-                    properties: { district: String(i + 1), name: `District ${i + 1}` },
+                    properties: { 
+                        district: String(i + 1),
+                        DISTRICT: String(i + 1),
+                        name: `District ${i + 1}` 
+                    },
                     geometry: {
                         type: "Polygon",
                         coordinates: [[[lon1, lat1], [lon2, lat1], [lon2, lat2], [lon1, lat2], [lon1, lat1]]]
                     }
                 });
             }
+
             return { type: "FeatureCollection", features };
         }
 
-        function createLayer(type) {
-            // Load real data if available
-            if (!districtData[type]) {
-                await loadRealData(type);
+        async function loadData(type) {
+            const fileNames = {
+                congress: 'congress.geojson',
+                senate: 'senate.geojson',
+                house: 'house.geojson'
+            };
+
+            try {
+                const response = await fetch(fileNames[type]);
+                if (response.ok) {
+                    console.log(`Loaded ${type} from file`);
+                    return await response.json();
+                }
+            } catch (e) {
+                console.log(`Using demo data for ${type}`);
             }
-            
-            const data = districtData[type];
+
+            const counts = { congress: 13, senate: 38, house: 110 };
+            return generateDemoData(type, counts[type]);
+        }
+
+        function getDistrictNumber(props) {
+            return props.district || props.DISTRICT || props.NAME || 
+                   props.CD || props.SLDUST || props.SLDLST || 'Unknown';
+        }
+
+        function createLayer(data, type) {
             return L.geoJSON(data, {
                 style: (feature) => {
-                    const district = feature.properties.district || feature.properties.DISTRICT || 
-                                   feature.properties.NAME || feature.properties.CD || '';
-                    const fillColor = type === 'congress' ? getDistrictColor(district, type) : colors[type];
-                    
+                    const district = getDistrictNumber(feature.properties);
+                    const fillColor = getDistrictColor(district, type);
                     return {
                         fillColor: fillColor,
                         weight: 2,
                         opacity: 1,
                         color: 'white',
-                        fillOpacity: type === 'congress' ? 0.7 : 0.4
+                        fillOpacity: electionResults[type][district] ? 0.7 : 0.4
                     };
                 },
                 onEachFeature: (feature, layer) => {
                     layer.on({
-                        click: (e) => showDistrictInfo(e, type, feature),
                         mouseover: (e) => {
-                            e.target.setStyle({ fillOpacity: 0.7, weight: 3 });
+                            e.target.setStyle({ weight: 3, color: '#666', fillOpacity: 0.7 });
+                            e.target.bringToFront();
                         },
                         mouseout: (e) => {
-                            e.target.setStyle({ fillOpacity: 0.4, weight: 2 });
+                            currentLayers[type].resetStyle(e.target);
+                        },
+                        click: (e) => {
+                            const district = getDistrictNumber(feature.properties);
+                            showInfo(type, district, e.latlng);
                         }
                     });
                 }
             });
         }
 
-        async function toggleLayer(type) {
-            const checkbox = document.getElementById(type + 'Check');
-            
-            if (checkbox.checked) {
-                if (!layers[type]) {
-                    layers[type] = await createLayer(type);
-                }
-                layers[type].addTo(map);
-            } else {
-                if (layers[type]) {
-                    map.removeLayer(layers[type]);
-                }
-            }
-            
-            updateLegend();
-        }
-
-        function showDistrictInfo(e, type, feature) {
-            const latlng = e.latlng;
-            const district = feature.properties.district || feature.properties.DISTRICT || 
-                           feature.properties.NAME || feature.properties.CD ||
-                           feature.properties.SLDUST || feature.properties.SLDLST || 'Unknown';
-            const info = { [type]: district };
-            
-            // Check all visible layers at this location
-            for (let layerType in layers) {
-                if (layers[layerType] && map.hasLayer(layers[layerType]) && layerType !== type) {
-                    layers[layerType].eachLayer(layer => {
-                        if (layer.getBounds().contains(latlng)) {
-                            const dist = layer.feature.properties.district || layer.feature.properties.DISTRICT || 
-                                       layer.feature.properties.NAME || layer.feature.properties.CD ||
-                                       layer.feature.properties.SLDUST || layer.feature.properties.SLDLST || 'Unknown';
-                            info[layerType] = dist;
-                        }
-                    });
-                }
-            }
-            
-            // Add election data if available
-            if (electionResults[type] && electionResults[type][district]) {
-                info.electionData = electionResults[type][district];
-                info.electionType = type;
-            }
-            
-            displayLocationInfo(info, latlng);
-        }
-
-        function displayLocationInfo(info, latlng) {
-            let html = '<div class="info-item"><span class="info-label">Location:</span><div class="info-value">' + 
-                       latlng.lat.toFixed(4) + ', ' + latlng.lng.toFixed(4) + '</div></div>';
-            
-            const districtTypes = {
+        function showInfo(type, district, latlng) {
+            const typeNames = {
                 congress: 'Congressional District',
                 senate: 'State Senate District',
                 house: 'State House District'
             };
-            
-            for (const [distType, label] of Object.entries(districtTypes)) {
-                if (info[distType]) {
-                    html += '<div class="info-item"><span class="info-label">' + label + ':</span><div class="info-value">District ' + info[distType];
-                    
-                    // Add election data if available for this district type
-                    if (info.electionData && info.electionType === distType) {
-                        const data = info.electionData;
-                        html += '<br>Representative: ' + data.winner + ' (' + data.party + ')';
-                        html += '<br>Margin: +' + data.margin.toFixed(1) + '%';
-                    }
-                    html += '</div></div>';
-                }
+
+            let html = `<div class="info-item"><span class="info-label">${typeNames[type]}:</span>`;
+            html += `<div class="info-value">District ${district}`;
+
+            if (electionResults[type][district]) {
+                const result = electionResults[type][district];
+                html += `<br>Representative: ${result.winner} (${result.party})`;
+                html += `<br>Margin: +${result.margin.toFixed(1)}%`;
             }
-            
+
+            html += '</div></div>';
             document.getElementById('locationInfo').innerHTML = html;
         }
 
-        function updateLegend() {
-            let html = '';
-            for (let type in layers) {
-                const checkbox = document.getElementById(type + 'Check');
-                if (checkbox.checked) {
-                    html += '<div class="legend-item"><div class="legend-color" style="background:' + 
-                            colors[type] + '"></div>' + names[type] + '</div>';
+        async function toggleLayer(type) {
+            const checkbox = document.getElementById(type + 'Check');
+
+            if (checkbox.checked) {
+                if (!currentLayers[type]) {
+                    console.log(`Loading ${type}...`);
+                    const data = await loadData(type);
+                    currentLayers[type] = createLayer(data, type);
+                }
+                currentLayers[type].addTo(map);
+                console.log(`${type} layer added to map`);
+            } else {
+                if (currentLayers[type]) {
+                    map.removeLayer(currentLayers[type]);
                 }
             }
-            document.getElementById('legendContent').innerHTML = html || '<div style="color: #999; font-style: italic;">No layers active</div>';
         }
 
-        function searchAddress() {
-            const address = document.getElementById('addressInput').value;
-            if (address) {
-                alert('Demo mode: Address search requires a geocoding service.\n\nIn the full version, this would:\n1. Geocode the address\n2. Find the location on the map\n3. Display all districts for that location');
-            }
-        }
-
-        function resetView() {
-            map.setView(initialView.center, initialView.zoom);
-        }
-
-        // Initialize
+        // Initialize with congressional districts
+        console.log('Loading initial layer...');
         toggleLayer('congress');
     </script>
 </body>
