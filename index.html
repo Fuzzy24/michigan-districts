@@ -272,8 +272,8 @@
                 <h4>Legend</h4>
                 <div id="legendContent">
                     <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Democrat</div>
-                    <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>6.5%)</div>
-                    <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤6.5%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>7%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤7%)</div>
                 </div>
             </div>
         </div>
@@ -307,10 +307,10 @@
             if (result.party === 'D') {
                 return '#FFFFFF'; // White for Democrats
             } else if (result.party === 'R') {
-                if (result.margin > 6.5) {
-                    return '#DC143C'; // Red for Republican won by >6.5%
+                if (result.margin > 7) {
+                    return '#DC143C'; // Red for Republican won by >7%
                 } else {
-                    return '#9370DB'; // Purple for Republican won by ≤6.5%
+                    return '#9370DB'; // Purple for Republican won by ≤7%
                 }
             }
             return colors[type];
