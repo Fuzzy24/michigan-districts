@@ -269,8 +269,12 @@
             </div>
             
             <div class="legend">
-                <h4>Active Layers</h4>
-                <div id="legendContent"></div>
+                <h4>Legend</h4>
+                <div id="legendContent">
+                    <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Democrat</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Republican (>6.5%)</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Republican (≤6.5%)</div>
+                </div>
             </div>
         </div>
     </div>
@@ -291,6 +295,26 @@
             senate: '#ff6b6b',
             house: '#4ecdc4'
         };
+
+        // Function to get color based on election results
+        function getDistrictColor(district, type) {
+            const results = electionResults[type];
+            if (!results) return colors[type];
+
+            const result = results[district];
+            if (!result) return colors[type];
+
+            if (result.party === 'D') {
+                return '#FFFFFF'; // White for Democrats
+            } else if (result.party === 'R') {
+                if (result.margin > 6.5) {
+                    return '#DC143C'; // Red for Republican won by >6.5%
+                } else {
+                    return '#9370DB'; // Purple for Republican won by ≤6.5%
+                }
+            }
+            return colors[type];
+        }
         const names = {
             congress: 'Congressional',
             senate: 'State Senate',
@@ -359,7 +383,7 @@
             return { type: "FeatureCollection", features };
         }
 
-        async function createLayer(type) {
+        function createLayer(type) {
             // Load real data if available
             if (!districtData[type]) {
                 await loadRealData(type);
@@ -367,12 +391,18 @@
             
             const data = districtData[type];
             return L.geoJSON(data, {
-                style: {
-                    fillColor: colors[type],
-                    weight: 2,
-                    opacity: 1,
-                    color: 'white',
-                    fillOpacity: 0.4
+                style: (feature) => {
+                    const district = feature.properties.district || feature.properties.DISTRICT || 
+                                   feature.properties.NAME || feature.properties.CD || '';
+                    const fillColor = type === 'congress' ? getDistrictColor(district, type) : colors[type];
+                    
+                    return {
+                        fillColor: fillColor,
+                        weight: 2,
+                        opacity: 1,
+                        color: 'white',
+                        fillOpacity: type === 'congress' ? 0.7 : 0.4
+                    };
                 },
                 onEachFeature: (feature, layer) => {
                     layer.on({
@@ -407,17 +437,29 @@
 
         function showDistrictInfo(e, type, feature) {
             const latlng = e.latlng;
-            const info = { [type]: feature.properties.district };
+            const district = feature.properties.district || feature.properties.DISTRICT || 
+                           feature.properties.NAME || feature.properties.CD ||
+                           feature.properties.SLDUST || feature.properties.SLDLST || 'Unknown';
+            const info = { [type]: district };
             
             // Check all visible layers at this location
             for (let layerType in layers) {
                 if (layers[layerType] && map.hasLayer(layers[layerType]) && layerType !== type) {
                     layers[layerType].eachLayer(layer => {
                         if (layer.getBounds().contains(latlng)) {
-                            info[layerType] = layer.feature.properties.district;
+                            const dist = layer.feature.properties.district || layer.feature.properties.DISTRICT || 
+                                       layer.feature.properties.NAME || layer.feature.properties.CD ||
+                                       layer.feature.properties.SLDUST || layer.feature.properties.SLDLST || 'Unknown';
+                            info[layerType] = dist;
                         }
                     });
                 }
+            }
+            
+            // Add election data if available
+            if (electionResults[type] && electionResults[type][district]) {
+                info.electionData = electionResults[type][district];
+                info.electionType = type;
             }
             
             displayLocationInfo(info, latlng);
@@ -427,14 +469,24 @@
             let html = '<div class="info-item"><span class="info-label">Location:</span><div class="info-value">' + 
                        latlng.lat.toFixed(4) + ', ' + latlng.lng.toFixed(4) + '</div></div>';
             
-            if (info.congress) {
-                html += '<div class="info-item"><span class="info-label">Congressional District:</span><div class="info-value">District ' + info.congress + '</div></div>';
-            }
-            if (info.senate) {
-                html += '<div class="info-item"><span class="info-label">State Senate District:</span><div class="info-value">District ' + info.senate + '</div></div>';
-            }
-            if (info.house) {
-                html += '<div class="info-item"><span class="info-label">State House District:</span><div class="info-value">District ' + info.house + '</div></div>';
+            const districtTypes = {
+                congress: 'Congressional District',
+                senate: 'State Senate District',
+                house: 'State House District'
+            };
+            
+            for (const [distType, label] of Object.entries(districtTypes)) {
+                if (info[distType]) {
+                    html += '<div class="info-item"><span class="info-label">' + label + ':</span><div class="info-value">District ' + info[distType];
+                    
+                    // Add election data if available for this district type
+                    if (info.electionData && info.electionType === distType) {
+                        const data = info.electionData;
+                        html += '<br>Representative: ' + data.winner + ' (' + data.party + ')';
+                        html += '<br>Margin: +' + data.margin.toFixed(1) + '%';
+                    }
+                    html += '</div></div>';
+                }
             }
             
             document.getElementById('locationInfo').innerHTML = html;
