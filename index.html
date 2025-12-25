@@ -189,7 +189,8 @@
         <div id="map">
             <div class="legend">
                 <h4>2024 Election Results</h4>
-                <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Solidly Democrat</div>
+                <div class="legend-item"><div class="legend-color" style="background:#2F5ED4; border: 2px solid #666;"></div>Solidly Democrat</div>
+                <div class="legend-item"><div class="legend-color" style="background:#0D0D40;"></div>Barely Democrat. Can't Spare Vote (≤5%)</div>
                 <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Solidly Republican (≤15%)</div>
                 <div class="legend-item"><div class="legend-color" style="background:#D42FA1;"></div>Leans Republican But Can Swing(>15%)</div>
                 <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Could Swing Democrat(>7%)</div>
@@ -396,7 +397,10 @@
 
             const result = results[district];
             if (result.party === 'D') {
-                return '#FFFFFF';
+                 if (result.margin < 5.0) {
+                    return '#0D0D40';
+                 } else {
+                return '#2F5ED4';
             } else if (result.party === 'R') {
                 if (result.margin > 15.0) {
                     return '#DC143C'; // Red for R >15%
