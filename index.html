@@ -190,8 +190,9 @@
             <div class="legend">
                 <h4>2024 Election Results</h4>
                 <div class="legend-item"><div class="legend-color" style="background:#FFFFFF; border: 2px solid #666;"></div>Solidly Democrat</div>
-                <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Barely Republican(>15%)</div>
                 <div class="legend-item"><div class="legend-color" style="background:#9370DB;"></div>Solidly Republican (≤15%)</div>
+                <div class="legend-item"><div class="legend-color" style="background:#D42FA1;"></div>Leans Republican But Can Swing(>15%)</div>
+                <div class="legend-item"><div class="legend-color" style="background:#DC143C;"></div>Could Swing Democrat(>7%)</div>
             </div>
         </div>
     </div>
@@ -395,9 +396,13 @@
 
             const result = results[district];
             if (result.party === 'D') {
-                return '#FFFFFF';
-            } else if (result.party === 'R') {
-                return result.margin > 15.0 ? '#DC143C' : '#9370DB';
+                if (result.margin > 15.0) {
+                    return '#DC143C'; // Red for R >15%
+                } else if (result.margin >= 7.0) {
+                    return '#D42FA1'; // Pink/Magenta for R between 7-15%
+                } else {
+                    return '#9370DB'; // Purple for R <7%
+                }
             }
             return colors[type];
         }
